@@ -39,14 +39,22 @@ export const setupTitle = (
 };
 
 export const setTitle = (item: FileItem, vault: Vault) => {
-    if (item.file.extension != 'md') {
+    let isFolgezettel = item.file.basename.match(/^[0-9]+[.-/0-9a-z]+[ _]/)!
+
+    if (item.file.extension != 'md' || !isFolgezettel) {
         return;
     }
 
-    let idMatch = item.file.basename.match(/([0-9]+|[a-z]+)/g)!;
-    if (idMatch) {
+    if (!item.file.path.contains("slipbox/notater")) {
+        return;
+    }
+
+    let fzId = item.file.basename.substring(0, item.file.basename.includes(" ") ? item.file.basename.indexOf(' ') : item.file.basename.length)
+    let idMatch = fzId.match(/([0-9]+|[a-z]+)/g)!;
+    
+    if (isFolgezettel && idMatch) {
         let indentCount = idMatch.length - 1;
-        let indentStr = (indentCount * 20).toString() + 'px';
+        let indentStr = (indentCount * 10).toString() + 'px';
         item.titleEl.style.marginLeft = indentStr;
     }
 
@@ -59,7 +67,7 @@ export const setTitle = (item: FileItem, vault: Vault) => {
 
                 const originalTitle = document.createElement('em');
                 originalTitle.className = 'folder-filename-title';
-                originalTitle.textContent = item.file.basename;
+                originalTitle.textContent = fzId;
                 item.titleInnerEl.append(originalTitle);
             }
         })
